@@ -5,10 +5,11 @@
 dependencies = [
     "numpy",
     "opencv-python",
-    "pandas"
+    "pandas",
+    "tensorflow"
 ]
 
-name = "CVSS24_GruppeX"
+name = "CVSS24_Gruppe1"
 version = "1.0"
 requires-python = ">=3.10"
 readme = "README.md"
