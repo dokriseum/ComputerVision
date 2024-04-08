@@ -1,4 +1,4 @@
-# CV_GruppeX
+# CV_Gruppe1
 
 Lösung zu den Laboraufgaben sind in den jeweiligen Ordern (5_10, 12_10).
 
