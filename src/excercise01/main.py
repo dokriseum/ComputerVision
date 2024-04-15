@@ -37,6 +37,7 @@ df_cleaned_rows = df_cleaned_rows[column_name] = df_cleaned_rows[column_name].ap
 )
 '''
 
+### Alter ergaenzen
 column_name = 'Customer_Age'
 # Extrahiere die vorhandenen Altersdaten, die nicht fehlen
 available_ages = df_cleaned_rows[column_name].dropna().unique()
@@ -45,13 +46,28 @@ df_cleaned_rows.loc[:, column_name] = df_cleaned_rows[column_name].apply(
     lambda x: np.random.choice(available_ages) if pd.isnull(x) else x
 )
 
-# Geschlecht ausfüllen
+### Geschlecht ergaenzen
 column_name = 'Customer_Gender'
 available_sex = df_cleaned_rows[column_name].dropna().unique()  # Extrahiere die vorhandenen Werte (M und W)
 # Sicherstellen, dass die Operation auf dem Original DataFrame ausgeführt wird
 df_cleaned_rows.loc[:, column_name] = df_cleaned_rows.loc[:, column_name].apply(
     lambda x: np.random.choice(available_sex) if pd.isnull(x) else x
 )
+
+### Produktkategorie ergaenzen
+column_name = 'Product_Category'
+# Modus der 'Produktkategorie' berechnen
+mode_product_category = df_cleaned_rows[column_name].mode()[0]
+# Fehlende Werte in 'Produktkategorie' mit dem Modus ersetzen
+df_cleaned_rows.loc[:, column_name] = df_cleaned_rows[column_name].fillna(mode_product_category)
+
+### Unterkategorie ergaenzen
+column_name = 'Sub_Category'
+# Modus der 'Produktkategorie' berechnen
+mode_sub_category = df_cleaned_rows[column_name].mode()[0]
+# Fehlende Werte in 'Produktkategorie' mit dem Modus ersetzen
+df_cleaned_rows.loc[:, column_name] = df_cleaned_rows[column_name].fillna(mode_sub_category)
+
 
 # Keine Notwendigkeit für eine zusätzliche Zuweisung, wenn nicht benötigt
 data_clean = df_cleaned_rows
