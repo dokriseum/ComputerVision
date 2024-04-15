@@ -1,10 +1,13 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import os as os
 
 
 # Einlesen der Tabelle
-car_price_ds = pd.read_csv("uncleaned2_bike_sales.csv")
+data_raw = pd.read_csv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "uncleaned2_bike_sales.csv"))
+
+print(data_raw)
 '''
 # create dataframe
 df = pd.DataFrame(data=[[1, "Honda Civic", 290, 15000],
