@@ -36,6 +36,50 @@ Beim Umgang mit fehlenden Daten in Datensätzen gibt es verschiedene Methoden, u
 Die Wahl der Methode hängt stark von der Art der Daten und dem Kontext der Analyse ab. Es ist wichtig, die Implikationen jeder Methode zu verstehen und wie sie die Ergebnisse Ihrer Datenanalyse beeinflussen kann. In der Praxis ist es oft sinnvoll, mehrere Methoden zu testen und ihre Auswirkungen auf die Analyseergebnisse zu vergleichen.
 
 ----
+Es gibt fehlende Werte in den folgenden Spalten:
+
+```
+
+Unnamed: 0           0
+Sales_Order #        0
+Date                 0
+Day                  1
+Month                0
+Year                 0
+Customer_Age         6
+Customer_Gender      9
+Country              0
+State                1
+Product_Category     1
+Sub_Category         1
+Order_Quantity       2
+Unit_Cost_$         12
+Unit_Price_$        12
+Profit_$            13
+Cost_$              12
+Revenue_$           13
+Unit_Cost_€         12
+Unit_Price_€        12
+Profit_€            13
+Cost_€              12
+Revenue_€           13
+```
+
+| Column            | Missing Values | Proposed Method            |
+|-------------------|:---------------:|----------------------------|
+| Day               | 1              | Random Replacement         |
+| Customer_Age      | 6              | Fill with mean             |
+| Customer_Gender   | 9              | Random Replacement         |
+| State             | 1              | Fehlende Werte durch Querverweise ergänzen |
+| Product_Category  | 1              | Fehlende Werte durch Querverweise ergänzen |
+| Sub_Category      | 1              | Fehlende Werte durch Querverweise ergänzen |
+| Order_Quantity    | 2              | Fill with mean             |
+| Unit_Cost_$       | 12             | Fill with mean             |
+| Unit_Price_$      | 12             | Fill with mean             |
+| Profit_$          | 13             | Fill with mean             |
+| Cost_$            | 12             | Fill with mean             |
+| Revenue_$         | 13             | Fill with mean             |
+
 
 - Customer_Age => Random Replacement (falls Durchschnitt errechnen)
 - Customer_Gender => Random Replacement (falls Durchschnitt errechnen)
@@ -48,3 +92,10 @@ Die Wahl der Methode hängt stark von der Art der Daten und dem Kontext der Anal
 - Profit_$ => 
 - Cost_$ => 
 - Revenue_$ => 
+
+
+## 5. Finden und beheben Sie Typos.
+Es könnte bei Zeichenfolgen vorkommen, daher wurden 'Month', 'Country' und 'State' überprüft.
+
+6. Finden Sie Ausreißer. Nutzen Sie hierfür das Box Plot und dokumentieren Sie das Diagramm zu jedem Feature.
+

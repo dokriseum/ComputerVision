@@ -1,187 +1,106 @@
 import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
-import os as os
-
-os_path = os.path.dirname(os.path.abspath(__file__))
-# Einlesen der Tabelle
-data_raw = pd.read_csv(os.path.join(os_path, "uncleaned2_bike_sales.csv"))
-
-print(data_raw)
 
 
-# Berechnen der Schwellenwerte
-thresh_row = int(0.4 * len(data_raw.columns))  # Mindestanzahl von nicht-fehlenden Werten pro Zeile
-thresh_col = int(0.4 * len(data_raw))          # Mindestanzahl von nicht-fehlenden Werten pro Spalte
+#1.  Verschaffen Sie sich einen Überblick über die Daten.
 
-# Entfernen von Spalten mit mehr als 60% fehlenden Werten
-df_cleaned_cols = data_raw.dropna(axis=1, thresh=thresh_col)
+#csv file path
+df = pd.read_csv('uncleaned2_bike_sales.csv')
 
-# Ausgabe der bereinigten Tabelle (nur Spalte)
-print("-- df_cleaned_cols --")
-print(df_cleaned_cols)
+#print(df.head())
+#print(df.shape)
+#print(df.columns)
+#print(df.index)
+#print(df.values)
+#print(df.describe())
+#print(df.info())
 
-# Entfernen von Zeilen mit mehr als 60% fehlenden Werten
-df_cleaned_rows = df_cleaned_cols.dropna(axis=0, thresh=thresh_row)
+#2. Data Cleaning
 
-# Ausgabe der bereinigten Tabelle (mit Zeilen)
-print("-- df_cleaned_rows --")
-print(df_cleaned_rows)
+## 2.1 kovertieren in Euro nach dollar
 
-data_preclean = df_cleaned_rows.to_csv(os.path.join(os_path, "bike_sales_preclean.csv"), index=False)
+# Define the exchange rate from USD to Euro
+usd_to_euro = 0.92
 
-'''
-# Ersetzen der fehlenden Werte in einer Spalte durch zufällige Werte aus derselben Spalte
-df_cleaned_rows = df_cleaned_rows[column_name] = df_cleaned_rows[column_name].apply(
-    lambda x: np.random.choice(df_cleaned_rows[column_name].dropna().values) if pd.isnull(x) else x
-)
-'''
+# Convert prices from USD to Euro
+df[' Unit_Cost_€'] = df[' Unit_Cost_$'] * usd_to_euro
+df[' Unit_Price_€ '] = df[' Unit_Price_$ '] * usd_to_euro
+df[' Profit_€ '] = df[' Profit_$ '] * usd_to_euro
+df[' Cost_€'] = df[' Cost_$'] * usd_to_euro
+df['Revenue_€'] = df['Revenue_$'] * usd_to_euro
 
-### Alter ergaenzen
-column_name = 'Customer_Age'
-# Extrahiere die vorhandenen Altersdaten, die nicht fehlen
-available_ages = df_cleaned_rows[column_name].dropna().unique()
-# Ersetze die fehlenden Werte in der Spalte 'Kunde_Alter' durch zufällige Werte aus derselben Spalte
-df_cleaned_rows.loc[:, column_name] = df_cleaned_rows[column_name].apply(
-    lambda x: np.random.choice(available_ages) if pd.isnull(x) else x
-)
+#print(df.head())
 
-### Geschlecht ergaenzen
-column_name = 'Customer_Gender'
-available_sex = df_cleaned_rows[column_name].dropna().unique()  # Extrahiere die vorhandenen Werte (M und W)
-# Sicherstellen, dass die Operation auf dem Original DataFrame ausgeführt wird
-df_cleaned_rows.loc[:, column_name] = df_cleaned_rows.loc[:, column_name].apply(
-    lambda x: np.random.choice(available_sex) if pd.isnull(x) else x
-)
+#print(df.shape)
+## 2.2  Löschen Sie Spalten (Features) in denen mehr als 60% der Einträge fehlen.
 
-### Produktkategorie ergaenzen
-column_name = 'Product_Category'
-# Modus der 'Produktkategorie' berechnen
-mode_product_category = df_cleaned_rows[column_name].mode()[0]
-# Fehlende Werte in 'Produktkategorie' mit dem Modus ersetzen
-df_cleaned_rows.loc[:, column_name] = df_cleaned_rows[column_name].fillna(mode_product_category)
-
-### Unterkategorie ergaenzen
-column_name = 'Sub_Category'
-# Modus der 'Produktkategorie' berechnen
-mode_sub_category = df_cleaned_rows[column_name].mode()[0]
-# Fehlende Werte in 'Produktkategorie' mit dem Modus ersetzen
-df_cleaned_rows.loc[:, column_name] = df_cleaned_rows[column_name].fillna(mode_sub_category)
+# Calculate threshold for columns and drop columns with more than 60% missing values
+threshold_col = len(df) * 0.4  
+df = df.dropna(thresh=threshold_col, axis=1)
 
 
-# Keine Notwendigkeit für eine zusätzliche Zuweisung, wenn nicht benötigt
-data_clean = df_cleaned_rows
+## 2.3   Löschen Sie Zeilen (Records) in denen mehr als 60% der Einträge fehlen.
+
+# Calculate threshold for rows and drop rows with more than 60% missing values
+threshold_row = len(df.columns) * 0.4  
+df = df.dropna(thresh=threshold_row, axis=0)
+
+#print(df.shape)
+
+## 2.4 Ergänzen Sie die restlichen fehlenden Einträge mit einer der folgenden Methoden
+missing_values = df.isnull().sum()
+print(missing_values)
+
+print(df.tail())
+
+def fill_missing_values(df, column, method):
+    if method == 'Random Replacement':
+        # Perform random replacement
+        df[column].fillna(df[column].sample(n=df[column].isnull().sum(), replace=True), inplace=True)
+    elif method == 'Fehlende Werte durch Querverweise ergänzen':
+        # Perform cross-reference replacement
+        # You would need to replace missing values based on some other column(s) in the DataFrame
+        # For example:
+        # df[column].fillna(df['Some_Other_Column'], inplace=True)
+        pass
+    elif method == 'Fill with zeros':
+        # Fill missing values with zeros
+        df[column].fillna(0, inplace=True)
+    elif method == 'Fill with mean':
+        # Fill missing values with mean
+        df[column].fillna(df[column].mean(), inplace=True)
+    elif method == 'stratified replacement':
+        # Perform stratified replacement
+        # You would need to implement the logic for this method
+        pass
+
+fill_missing_values(df, 'Customer_Gender', 'Random Replacement')
+fill_missing_values(df, 'State', 'Fehlende Werte durch Querverweise ergänzen')
+fill_missing_values(df, 'Order_Quantity', 'Fill with mean')
+fill_missing_values(df, ' Unit_Cost_$', 'Fill with mean')
+fill_missing_values(df, ' Unit_Price_$ ', 'Fill with mean')
+fill_missing_values(df, ' Unit_Cost_$', 'Fill with mean')
+fill_missing_values(df, ' Unit_Price_$ ', 'Fill with mean')
+fill_missing_values(df, ' Profit_$ ', 'Fill with mean')
+fill_missing_values(df, ' Cost_$', 'Fill with mean')
+fill_missing_values(df, 'Revenue_$', 'Fill with mean')
+# Add more calls for other columns as needed
+
+df[' Unit_Cost_$'] = df[' Unit_Cost_$'].round(2)
+df[' Unit_Price_$ '] = df[' Unit_Price_$ '].round(2)
+df[' Profit_$ '] = df[' Profit_$ ' ].round(2)
+df[' Cost_$'] = df[' Cost_$'].round(2)
+
+print(df.tail())
 
 
-data_clean = data_clean.to_csv(os.path.join(os_path, "bike_sales_clean.csv"), index=False)
+## 2.5 Finden und beheben Sie Typos.
 
-print(data_clean)
+print(df['Month'].value_counts())
+print(df['Country'].value_counts())
+print(df['State'].value_counts())
 
-print("-- Ende --")
+df['Month'] = df['Month'].replace('Decmber', 'December')
+df['Country'] = df['Country'].replace([' United States', 'United  States'], 'United States')
 
-
-
-'''
-
-
-# plot function
-x = np.linspace(0, 10, num=1000)
-y = np.cos(x)
-
-plt.plot(x, y)
-plt.show()
-
-# plot matrix
-random_matrix = np.random.random(size=(2, 1000))
-
-print(random_matrix.shape)
-print(random_matrix[0].shape)
-
-plt.plot(random_matrix)
-plt.show()
-
-plt.scatter(random_matrix[0], random_matrix[1])
-plt.show()
-
-plt.hist(random_matrix[0])
-plt.show()
-# exit()
-
-# Subplots
-fig, axs = plt.subplots(3)
-fig.suptitle('Vertically stacked subplots')
-fig.tight_layout()
-axs[0].plot(random_matrix[0], random_matrix[1])
-axs[0].set_xlabel("x axis")
-axs[0].set_ylabel("y axis")
-axs[0].set_title("plot random values")
-axs[1].scatter(random_matrix[0], random_matrix[1])
-axs[1].set_title("scatter random values")
-axs[2].hist(random_matrix[0])
-
-plt.show()
-
-######################################
-# create dataframe
-df = pd.DataFrame(data=[[1, "Honda Civic", 290, 15000],
-                        [2, "BMW", 300, 30000]], columns=["id", "CarName", "horsepower", "price"])
-
-# # print entire dataframe
-print("-- Dataframe --")
-print(df)
-
-# get first record of a dataframe
-print("-- Get row by index --")
-print(df.loc[0])
-
-print("-- Set index --")
-df = df.set_index("CarName")
-print(df)
-
-print("-- Get Row by row index --")
-print(df.loc["BMW"])
-
-print("-- Get Row by row number --")
-print(df.iloc[:])
-
-# get one column of a dataframe
-print("-- Specific Column --")
-print(df["horsepower"])
-
-print("-- Description --")
-print(df.describe())
-
-print("-- Datatypes --")
-print(df.dtypes)
-
-# read a csv
-car_price_ds = pd.read_csv("CarPrice_Assignment.csv")
-
-# print car price dataset
-print("-- Car Price Dataset --")
-print(car_price_ds)
-
-# print all column names
-print("-- Car Price Dataset Column Names --")
-print(car_price_ds.columns)
-
-
-# get data from multiple columns
-print("-- get data from multiple columns --")
-
-price_vs_highwaympg = car_price_ds[["price", "highwaympg"]]
-print("-- price vs highwaympg --")
-print(price_vs_highwaympg)
-
-print("-- Datatypes --")
-print(price_vs_highwaympg.dtypes)
-
-price_vs_highwaympg_np = price_vs_highwaympg.to_numpy()
-print(type(price_vs_highwaympg_np))
-print(price_vs_highwaympg_np.dtype)
-
-print(price_vs_highwaympg_np.shape)
-
-plt.scatter(price_vs_highwaympg_np[:, 0], price_vs_highwaympg_np[:, 1])
-plt.show()
-'''
+print(df['Month'].value_counts())
+print(df['Country'].value_counts())
