@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import MinMaxScaler
 
 #1.  Verschaffen Sie sich einen Überblick über die Daten.
 
@@ -219,10 +222,10 @@ plt.legend()
 plt.show()
 
 """
-
+#print(df.shape)
 #5. Data Codification, Wandeln Sie alle nicht-numerischen Features in numerische Features um.
 # month, customer_gender, counttry, state, product_datagory, Sub_catagory -> nicht nummerlisch.     
-# Label-Encoding이나 One-Hot-Encoding을 적용하고, 
+# Label-Encoding or One-Hot-Encoding 
 
 #one-hot encoding
 
@@ -233,19 +236,69 @@ df.to_csv('bike_sales_codified.csv', index=False)
 
 #7. Data Reduction
 
-    #7.1. Löschen Sie redundante Features
+    #df.drop_duplicates() beides Spalten und Zeilen
+    #7.1. Löschen Sie redundante Features (spalten)
+
+redundant_columns = df.columns[df.columns.duplicated()]
+df.drop(redundant_columns, axis=1, inplace=True)
+
+print(df.shape)
 
     #7.2. Suchen und löschen Sie redundante Records (Zeilen).
+df.drop_duplicates(inplace=True)
+print(df.shape)
 
     #7.3. Erstellen Sie eine Korrelationsmatrix (https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.corr.html) und dokumentieren diese.
+# Erstellen einer Korrelationsmatrix
+correlation_matrix = df.corr()
+#print(correlation_matrix)
 
     #7.4. Löschen Sie ggf. Features die stark korrelieren und dokumentieren Sie Ihre Entscheidung.
+threshold = 0.8  
+highly_correlated_features = set()  
+for i in range(len(correlation_matrix.columns)):
+    for j in range(i):
+        if abs(correlation_matrix.iloc[i, j]) > threshold:
+            feature1 = correlation_matrix.columns[i]
+            feature2 = correlation_matrix.columns[j]
+        
+            highly_correlated_features.add(feature1)
+            highly_correlated_features.add(feature2)
 
+df.drop(highly_correlated_features, axis=1, inplace=True)
+#print(correlation_matrix)
+
+   
     #7.5. Führen Sie eine Principal Component Analysis durch (Achten Sie darauf, dass alle Features standardisiert werden müssen). Dokumentieren Sie die Anzahl der Principal Components, die 95% Varianz der Daten abdecken.
 
+# Create and fit PCA model.
+pca = PCA()  # Create PCA model.
+pca.fit(scaled_data)  # Fit the PCA model to the scaled data.
+
+# Check cumulative explained variance.
+cumulative_variance_ratio = np.cumsum(pca.explained_variance_ratio_)  # Check cumulative explained variance.
+
+# Find the number of principal components explaining 95% of variance.
+n_components = np.argmax(cumulative_variance_ratio >= 0.95) + 1  # Find the number of principal components explaining 95% of variance.
+
+# Refit PCA and transform principal components.
+pca = PCA(n_components=n_components)  # Refit PCA with the updated number of components.
+principal_components = pca.fit_transform(scaled_data)  # Transform the principal components.
+
+
 #8. Speichern Sie den Datensatz, nicht standardisiert, unter dem Namen "bike_sales_reduced.csv" zwischen.
+df.to_csv('bikw_sales_reduced.csv', index=False)
 
 #9. Data Normailization, Normalisieren Sie alle Features
+# Min-Max scaler init
+scaler = MinMaxScaler()
+
+normalized_data = scaler.fit_transform(df)
+
+# normalized data trancefer to DataFrame
+normalized_df = pd.DataFrame(normalized_data, columns=df.columns)
+
+print(normalized_df.head())
 
 #10. Speichern Sie den Datensatz unter dem Namen "bike_sales_normalized.csv".
-
+df.to_csv('bike_sales_normalized.csv', index=False)
