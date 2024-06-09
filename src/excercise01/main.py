@@ -161,7 +161,7 @@ df['Country'] = df['Country'].replace([' United States', 'United  States', 'Unit
 #2.6. Finden Sie Ausreißer. Nutzen Sie hierfür das Box Plot und dokumentieren Sie das Diagramm zu jedem Feature.
 # outlier, Boxplot, IQR
 # Diagramm zu jedem Feature: Spalten (Features)
-"""
+
 numeric_cols = df.select_dtypes(include='number').columns
 
 # Box Plot generate 
@@ -185,13 +185,13 @@ for column in numeric_cols:
         print(outliers)
     else:
         print(f'No outliers detected in {column}.')
-"""
+
 
 #3. Speichern Sie den Datensatz unter dem Namen "bike_sales_clean.csv" zwischen.
 df.to_csv('bike_sales_clean.csv', index=False)
 
 #print(df.isnull().sum())
-"""
+
 #4. Data Visualization
     #4.1. Visualisieren Sie in einem geeignetem Diagram, wieviele Männer und wieviele Frauen ein Fahrrad gekauft haben.
 plt.figure(figsize=(8, 6))
@@ -221,7 +221,7 @@ plt.ylabel('Revenue')
 plt.legend()
 plt.show()
 
-"""
+
 #print(df.shape)
 #5. Data Codification, Wandeln Sie alle nicht-numerischen Features in numerische Features um.
 # month, customer_gender, counttry, state, product_datagory, Sub_catagory -> nicht nummerlisch.     
