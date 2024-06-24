@@ -8,9 +8,10 @@ from sklearn.preprocessing import MinMaxScaler
 #1.  Verschaffen Sie sich einen Überblick über die Daten.
 
 #csv file path
-df = pd.read_csv('uncleaned2_bike_sales.csv')
+df = pd.read_csv('uncleaned2_bike_sales.csv', index_col=False)
 
-#print(df.head())
+print(df.head())
+
 #print(df.shape)
 #print(df.columns)
 #print(df.index)
@@ -22,17 +23,43 @@ df = pd.read_csv('uncleaned2_bike_sales.csv')
 
 ## 2.1 kovertieren in Euro nach dollar
 
+# 1. Nutzen Sie als Wechselkurs den Monat + das Jahr 
+# in dem die Daten erhoben wurden (Spalte 'Date')
+
+# Convert 'Date' column to datetime format
+df['Date'] = pd.to_datetime(df['Date'])
+
+# Define exchange rates by month and year
+exchange_rates = {
+    '2021-12': 0.92,  # Example exchange rate for December 2021
+    # Add more months as needed
+}
+
+# Map exchange rates based on 'Month_Year' column
+df['Month_Year'] = df['Date'].dt.strftime('%Y-%m')
+df['Exchange_Rate'] = df['Month_Year'].map(exchange_rates)
+
 # Define the exchange rate from USD to Euro by 8.6.
-usd_to_euro = 0.92 
+# usd_to_euro = 0.92 
 
 # Convert prices from USD to Euro
-df[' Unit_Cost_€'] = df[' Unit_Cost_$'] * usd_to_euro
-df[' Unit_Price_€ '] = df[' Unit_Price_$ '] * usd_to_euro
-df[' Profit_€ '] = df[' Profit_$ '] * usd_to_euro
-df[' Cost_€'] = df[' Cost_$'] * usd_to_euro
-df['Revenue_€'] = df['Revenue_$'] * usd_to_euro
+df[' Unit_Cost_€'] = df[' Unit_Cost_$'] * df['Exchange_Rate']
+df[' Unit_Price_€ '] = df[' Unit_Price_$ '] * df['Exchange_Rate']
+df[' Profit_€ '] = df[' Profit_$ '] * df['Exchange_Rate']
+df[' Cost_€'] = df[' Cost_$'] * df['Exchange_Rate']
+df['Revenue_€'] = df['Revenue_$'] * df['Exchange_Rate']
 
 #print(df.head())
+
+# 2. Nachdem Sie $ -> € umgerechnet haben, brauchen Sie die $ Spalten nicht mehr und können diese löschen. 
+# Somit müssen Sie auch kein replacement auf diesen Spalten durchführen.
+
+# Löschen der $-Spalten
+df.drop(columns=[' Unit_Cost_$', ' Unit_Price_$ ', ' Profit_$ ', ' Cost_$', 'Revenue_$'], inplace=True)
+df.drop(columns=['Exchange_Rate'], inplace=True)
+print(df.head())
+
+
 
 #print(df.shape)
 ## 2.2  Löschen Sie Spalten (Features) in denen mehr als 60% der Einträge fehlen.
@@ -118,11 +145,14 @@ fill_missing_values(df, 'State', 'Fehlende Werte durch Querverweise ergänzen')
 fill_missing_values(df, 'Product_Catagory', 'Fehlende Werte durch Querverweise ergänzen')
 fill_missing_values(df, 'Sub_Catagory', 'Fehlende Werte durch Querverweise ergänzen')
 fill_missing_values(df, 'Order_Quantity', 'Random Replacement')
+
+"""
 fill_missing_values(df, ' Unit_Cost_$', 'Fill with mean')
 fill_missing_values(df, ' Unit_Price_$ ', 'Fill with mean')
 fill_missing_values(df, ' Cost_$', 'Fill with mean')
 fill_missing_values(df, 'Revenue_$', 'Fill with mean')
 fill_missing_values(df, ' Profit_$ ', 'Fill with mean')
+"""
 
 #print(df.tail())
 #remove Nachkommastellen
@@ -132,12 +162,14 @@ df['Year'] = df['Year'].round(0).astype(int)
 df['Customer_Age'] = df['Customer_Age'].round(0).astype(int)
 df['Order_Quantity'] = df['Order_Quantity'].round(0).astype(int)
 
-
+"""
 df[' Unit_Cost_$'] = df[' Unit_Cost_$'].round(2)
 df[' Unit_Price_$ '] = df[' Unit_Price_$ '].round(2)
 df[' Profit_$ '] = df[' Profit_$ '].round(2)
 df[' Cost_$'] = df[' Cost_$'].round(2)
 df['Revenue_$'] = df['Revenue_$'].round(2)
+
+"""
 df[' Unit_Cost_€'] = df[' Unit_Cost_€'].round(2)
 df[' Unit_Price_€ '] = df[' Unit_Price_€ '].round(2)
 df[' Profit_€ '] = df[' Profit_€ '].round(2)
@@ -145,23 +177,24 @@ df[' Cost_€'] = df[' Cost_€'].round(2)
 df['Revenue_€'] = df['Revenue_€'].round(2)
 
 
+
 ## 2.5 Finden und beheben Sie Typos.
 
 #print(df['Month'].value_counts())
-#print(df['Country'].value_counts())
+print(df['Country'].value_counts())
 #print(df['State'].value_counts())
 
 df['Month'] = df['Month'].replace('Decmber', 'December')
 df['Country'] = df['Country'].replace([' United States', 'United  States', 'United States ', ' United States '], 'United States')
 
 #print(df['Month'].value_counts())
-#print(df['Country'].value_counts())
+print(df['Country'].value_counts())
 #print(df['State'].value_counts())
 
 #2.6. Finden Sie Ausreißer. Nutzen Sie hierfür das Box Plot und dokumentieren Sie das Diagramm zu jedem Feature.
 # outlier, Boxplot, IQR
 # Diagramm zu jedem Feature: Spalten (Features)
-
+"""
 numeric_cols = df.select_dtypes(include='number').columns
 
 # Box Plot generate 
@@ -186,11 +219,17 @@ for column in numeric_cols:
     else:
         print(f'No outliers detected in {column}.')
 
-
+"""
 #3. Speichern Sie den Datensatz unter dem Namen "bike_sales_clean.csv" zwischen.
 df.to_csv('bike_sales_clean.csv', index=False)
 
 #print(df.isnull().sum())
+
+df = pd.read_csv('bike_sales_clean.csv', index_col=False)
+
+
+
+print(df.head())
 
 #4. Data Visualization
     #4.1. Visualisieren Sie in einem geeignetem Diagram, wieviele Männer und wieviele Frauen ein Fahrrad gekauft haben.
@@ -202,9 +241,11 @@ plt.ylabel('Number of Purchases')
 plt.xticks(rotation=0)
 plt.show()
 
+
     #4.2. Visualisieren Sie den Gewinn pro Land.
+    # hier fehlt frankreich
 plt.figure(figsize=(10, 6))
-df.groupby('Country')[' Profit_$ '].sum().plot(kind='bar')
+df.groupby('Country')[' Profit_€ '].sum().plot(kind='bar')
 plt.title('Total Profit by Country')
 plt.xlabel('Country')
 plt.ylabel('Total Profit')
@@ -221,7 +262,7 @@ plt.ylabel('Revenue')
 plt.legend()
 plt.show()
 
-
+"""
 #print(df.shape)
 #5. Data Codification, Wandeln Sie alle nicht-numerischen Features in numerische Features um.
 # month, customer_gender, counttry, state, product_datagory, Sub_catagory -> nicht nummerlisch.     
@@ -302,3 +343,4 @@ print(normalized_df.head())
 
 #10. Speichern Sie den Datensatz unter dem Namen "bike_sales_normalized.csv".
 df.to_csv('bike_sales_normalized.csv', index=False)
+"""
