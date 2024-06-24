@@ -96,19 +96,26 @@ x_pca_3d = apply_pca(x)
 
 #  2. Erstellen Sie ein Scatter Diagramm für jede Clustering-Methode. Nutzen Sie verschiedene Farben für die Datenpunkte, um die Cluster darzustellen. Nutzen Sie verschiedene Symbole für die Datenpunkte, um die Klassen (setosa, versicolor, virginica) darzustellen.
 
-def plot_clusters_3d(data, clusters, title):
+def plot_clusters_3d(data, clusters, true_labels, title):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    scatter = ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=clusters, cmap='viridis', marker='o')
+    markers = ['o', '^', 's']
+    colors = ['r', 'g', 'b']
+
+    for i in range(len(data)):
+        ax.scatter(data[i, 0], data[i, 1], data[i, 2], c=colors[true_labels[i]], marker=markers[clusters[i]])
+
+    scatter = ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=clusters, cmap='viridis')
     legend1 = ax.legend(*scatter.legend_elements(), title="Clusters")
     ax.add_artist(legend1)
     plt.title(title)
     plt.show()
 
-plot_clusters_3d(x_pca_3d, clusters_k2, "K-Means Clustering with k=2")
-plot_clusters_3d(x_pca_3d, clusters_k3, "K-Means Clustering with k=3")
-plot_clusters_3d(x_pca_3d, clusters_k4, "K-Means Clustering with k=4")
-plot_clusters_3d(x_pca_3d, clusters_dbscan, "DBSCAN Clustering")
+
+plot_clusters_3d(x_pca_3d, clusters_k2, y, "K-Means Clustering with k=2")
+plot_clusters_3d(x_pca_3d, clusters_k3, y, "K-Means Clustering with k=3")
+plot_clusters_3d(x_pca_3d, clusters_k4, y, "K-Means Clustering with k=4")
+plot_clusters_3d(x_pca_3d, clusters_dbscan, y, "DBSCAN Clustering")
 
 
 #    3. Bewerten Sie die Qualität der Clustering-Methode anhand der Plotts. Dokumentieren Sie Ihre Bewertung als Kommentar im Code.
