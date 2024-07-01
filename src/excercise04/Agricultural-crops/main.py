@@ -233,3 +233,17 @@ print("img resized and saved")
 
 #9. Implementieren Sie eine Funktion, die die Bilder normiert.
 
+def normalize_image(image_path, target_width, target_height):
+    # Load image
+    image = cv2.imread(image_path)
+    if image is None:
+        print(f"Fehler beim Laden des Bildes: {image_path}")
+        return None
+
+    # Resize image to target size
+    image = cv2.resize(image, (target_width, target_height))
+
+    # Normalize pixel values to [0, 1]
+    normalized_image = image.astype(float) / 255.0
+
+    return normalized_image
