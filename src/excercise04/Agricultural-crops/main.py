@@ -18,11 +18,12 @@ dataset_path = "." # img_dataset located in the same folder.
 image_paths = []
 labels = []
 aspect_ratios = []
+image_sizes = []
 
 
 for root, dirs, files in os.walk(dataset_path):
     for file in files:
-        if file.endswith(("jpg", "jpeg", "png")):
+        if file.lower().endswith(("jpg", "jpeg", "png")):
             image_path = os.path.join(root, file)
             image_paths.append(image_path)
             labels.append(os.path.basename(root))
@@ -33,8 +34,13 @@ for root, dirs, files in os.walk(dataset_path):
                 height, width, _ = img.shape
                 aspect_ratio = width / height
                 aspect_ratios.append(aspect_ratio)
+
+                # Bildgröße berechnen
+                image_size = width * height
+                image_sizes.append(image_size)
             except Exception as e:
                 print(f"Fehler beim Laden/Berechnen von {image_path}: {e}")
+
 """
 # img and label
 def show_image(index):
@@ -133,6 +139,7 @@ plt.show()
 """
 #5. Berechnen Sie die Aspect Ratio pro Bild und plotten Sie die Verteilung. Speichern Sie den Plot in Ihrem Git-Repo ab.
 # Aspect Ratio Verteilung plotten
+"""
 plt.figure(figsize=(10, 6))
 plt.hist(aspect_ratios, bins=20, edgecolor='black')
 plt.xlabel('Aspect Ratio')
@@ -146,16 +153,83 @@ save_path_aspect_ratio = './aspect_ratio_distribution.png'
 plt.savefig(save_path_aspect_ratio)
 
 plt.show()
+"""
 #6. Berechnen Sie die Größe in Pixel^2 pro Bild und plotten Sie die Verteilung. Speichern Sie den Plot in Ihrem Git-Repo ab.
+"""
 
+# plot Histogram
+plt.figure(figsize=(10, 6))
+plt.hist(image_sizes, bins=20, edgecolor='black')
+plt.xlabel('Bildgröße (Pixel^2)')
+plt.ylabel('Anzahl der Bilder')
+plt.title('Verteilung der Bildgrößen der Bilder')
+plt.grid(True)
+plt.tight_layout()
+
+# Plot save
+save_path_image_size = './image_size_distribution.png'
+plt.savefig(save_path_image_size)
+
+plt.show()
+"""
 #7. Implementieren Sie eine Funktion, welche die Größe von Bildern mit einer Aspect Ratio unter 0.8 oder über 1.2  mit Letterboxing ändert, ansonsten ohne Letterboxing.
-"""
-if 0.8 <= AR <= 1.2:
-    resize no letterboxing
-else:
-    resize with letterboxing
-"""
-#8.Nutzen Sie die in Schritt 7 implementierte Funktion, um alle Bilder auf eine Größe von (256, 256) zu bringen und speichern Sie die Bilder außerhalb Ihres Git-Repos als PNG-Dateien ab.
+
+print(img.shape)#high, width, channel
+
+def resize_images_with_letterboxing(image_paths, target_width, target_height):
+    resized_images = []
+
+    for image_path in image_paths:
+        image = cv2.imread(image_path)
+        if image is None:
+            print(f"Fehler beim Laden des Bildes: {image_path}")
+            continue
+
+        height, width, _ = image.shape
+        aspect_ratio = width / height
+
+        if 0.8 <= aspect_ratio <= 1.2:
+            # Kein Letterboxing
+            resized_image = cv2.resize(image, (target_width, target_height))
+        else:
+            # Mit Letterboxing
+            if aspect_ratio > 1.2:  # Bild ist breiter
+                new_width = int(target_height * aspect_ratio)
+                resized_image = cv2.resize(image, (new_width, target_height))
+                left_padding = (new_width - target_width) // 2
+                resized_image = resized_image[:, left_padding:left_padding + target_width]
+            else:  # aspect_ratio < 0.8, Bild ist höher
+                new_height = int(target_width / aspect_ratio)
+                resized_image = cv2.resize(image, (target_width, new_height))
+                top_padding = (new_height - target_height) // 2
+                resized_image = resized_image[top_padding:top_padding + target_height, :]
+
+        resized_images.append(resized_image)
+
+    return resized_images
+
+resized_images = resize_images_with_letterboxing(image_paths, target_width=500, target_height=500)
+
+print(resized_images[0].shape) 
+
+
+#8.Nutzen Sie die in Schritt 7 implementierte Funktion, um alle Bilder auf eine Größe von (256, 256) zu bringen 
+# und speichern Sie die Bilder außerhalb Ihres Git-Repos als PNG-Dateien ab.
+
+target_width = 256
+target_height = 256
+
+resized_images = resize_images_with_letterboxing(image_paths, target_width, target_height)
+
+# saving under
+output_directory = "./resized_images"
+os.makedirs(output_directory, exist_ok=True)
+
+for i, resized_image in enumerate(resized_images):
+    output_filename = os.path.join(output_directory, f"resized_image_{i}.png")
+    cv2.imwrite(output_filename, resized_image)
+
+print("img resized and saved")
 
 #9. Implementieren Sie eine Funktion, die die Bilder normiert.
 
