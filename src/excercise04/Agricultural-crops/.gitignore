@@ -5,3 +5,4 @@
 # Except for specific PNG files
 !bspl_images_plot.png
 !class_distribution_plot.png
+!aspect_ratio_distribution.png
