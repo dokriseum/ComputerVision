@@ -1,2 +1,12 @@
 .venv/
 .idea/
+/src/excercise01/bike_sales_clean.csv
+/src/excercise01/bike_sales_preclean.csv
+/classification_data.csv
+/regression_data.csv
+/best_model.h5
+/best_model_cats_vs_dogs.h5
+/metrics_cats_vs_dogs.png
+/model_performance.png
+/model_performance_cats_vs_dogs.png
+/training_validation_metrics.png
