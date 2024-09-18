@@ -1,0 +1,13 @@
+# Ignore converted folders
+bike/
+bin/
+shield/
+
+bike_neu/
+bin_neu/
+bin_neu_neu/
+shield_neu/
+
+converted_bike/
+converted_bin/
+converted_shield/
