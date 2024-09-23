@@ -27,7 +27,7 @@ if len(sys.argv) != 2:
     print("Argument Error: Please provide just the root project path as argument.")
     sys.exit(1)
 project_root_path = os.path.abspath(sys.argv[1])
-data_root_path = os.path.join(project_root_path, "dataset_quadratisch_klein_128")
+data_root_path = os.path.join(project_root_path, "dataset_quadratisch_128")
 
 if not os.path.exists(data_root_path):
     raise FileNotFoundError(f"Dataset folder not found: {data_root_path}")
@@ -39,7 +39,7 @@ if gpus:
         tf.config.experimental.set_memory_growth(gpu, True)
 
 
-EPOCHS = 10
+EPOCHS = 25
 BATCH_SIZE = 4
 IMAGE_SIZE = (128, 128)
 NUM_CLASSES = 3  # (bike, bin, shield)
@@ -48,24 +48,31 @@ SPLIT = 0.2
 AUTOTUNE = tf.data.AUTOTUNE
 
 
+# Noch fortgeschrittenere Data Augmentation Einstellungen
 train_datagen = ImageDataGenerator(
-    rescale=1./255,
-    rotation_range=10,
-    width_shift_range=0.1,
-    height_shift_range=0.1,
-    shear_range=0.1,
-    zoom_range=0.1,
-    horizontal_flip=True,
-    validation_split=0.2
+    rescale=1./255,                    # Normalisieren der Pixelwerte
+    rotation_range=90,                 # Erhöht die Spanne der zufälligen Rotation
+    width_shift_range=0.3,             # Erhöht die Spanne für horizontale Verschiebungen
+    height_shift_range=0.3,            # Erhöht die Spanne für vertikale Verschiebungen
+    shear_range=0.4,                   # Erhöht die Scherintensität
+    zoom_range=[0.5, 1.5],             # Erweitert den Bereich für zufälliges Zoomen
+    channel_shift_range=80.0,          # Intensität der Farbkanalverschiebung
+    horizontal_flip=True,              # Horizontales Flippen zulassen
+    vertical_flip=True,                # Vertikales Flippen zulassen
+    brightness_range=[0.3, 1.7],       # Erweitert den Bereich für zufällige Helligkeitsänderungen
+    fill_mode='mirror',                # Ändert die Füllmethode für neu erschaffene Pixel zu 'mirror'
+    validation_split=0.2               # Teilt den Datensatz in Trainings- und Validierungsdaten
 )
 
+# Setup für Trainings- und Validierungsgeneratoren
 train_generator = train_datagen.flow_from_directory(
     data_root_path,
     target_size=IMAGE_SIZE,
     batch_size=BATCH_SIZE,
     class_mode='categorical',
     subset='training',
-    classes=['bike', 'bin', 'shield']
+    shuffle=True,
+    seed=42
 )
 
 validation_generator = train_datagen.flow_from_directory(
@@ -74,7 +81,8 @@ validation_generator = train_datagen.flow_from_directory(
     batch_size=BATCH_SIZE,
     class_mode='categorical',
     subset='validation',
-    classes=['bike', 'bin', 'shield']
+    shuffle=True,
+    seed=42
 )
 
 # VGG16 
@@ -118,7 +126,7 @@ plt.plot(history.history['val_loss'], label='Validation Loss')
 plt.xlabel('Epoch')
 plt.ylabel('Loss')
 plt.legend()
-plt.title('Training and Validation Loss')
+plt.title('F4 Training and Validation Loss')
 plt.savefig(os.path.join(saved_model_dir, 'training_validation_loss.png'), format='png')
 plt.show()
 
@@ -128,12 +136,16 @@ plt.plot(history.history['val_accuracy'], label='Validation Accuracy')
 plt.xlabel('Epoch')
 plt.ylabel('Accuracy')
 plt.legend()
-plt.title('Training and Validation Accuracy')
+plt.title('F4 Training and Validation Accuracy')
 plt.savefig(os.path.join(saved_model_dir, 'training_validation_accuracy.png'), format='png')
 plt.show()
 
 
-model.save(saved_model_dir)
+# Modell speichern mit der richtigen Dateierweiterung
+model_save_path = os.path.join(saved_model_dir, 'model.h5')  # Verwende .h5 für das HDF5-Format
+model.save(model_save_path)
+print(f"Modell gespeichert unter: {model_save_path}")
+
 
 
 class_names = {v: k for k, v in train_generator.class_indices.items()}
@@ -143,21 +155,27 @@ with open(os.path.join(saved_model_dir, 'class_names.json'), 'w') as f:
 print(f"Model and class names saved to {saved_model_dir}")
 
 # 예측 및 Confusion Matrix 계산
-y_true = validation_generator.classes
-y_pred = np.argmax(model.predict(validation_generator), axis=1)
 
-cm = confusion_matrix(y_true, y_pred)
-report = classification_report(y_true, y_pred, target_names=validation_generator.class_indices.keys())
+# Vorhersagen für das Validierungsset
+validation_generator.reset()  # Stellt sicher, dass die Reihenfolge der Vorhersagen und Labels übereinstimmt
+predictions = model.predict(validation_generator, steps=len(validation_generator))
+predicted_classes = np.argmax(predictions, axis=1)  # Konvertiere die Wahrscheinlichkeiten zu Klassenindizes
 
-# Confusion Matrix 
+# Tatsächliche Labels
+true_classes = validation_generator.classes
+
+# Erstellen der Konfusionsmatrix
+cm = confusion_matrix(true_classes, predicted_classes)
+
+# Visualisieren der Konfusionsmatrix
 plt.figure(figsize=(10, 7))
 sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=validation_generator.class_indices.keys(), yticklabels=validation_generator.class_indices.keys())
-plt.xlabel('Predicted')
-plt.ylabel('True')
-plt.title('Confusion Matrix')
-plt.savefig(os.path.join(saved_model_dir, 'confusion_matrix.png'), format='png')
+plt.xlabel('Vorhergesagt')
+plt.ylabel('Wahr')
+plt.title('Konfusionsmatrix')
+conf_matrix_path = os.path.join(saved_model_dir, 'confusion_matrix.png')
+plt.savefig(conf_matrix_path)
 plt.show()
 
-# Classification Report 
-print("Classification Report:")
-print(report)
+# Ausgeben des Speicherorts der Konfusionsmatrix
+print(f"Konfusionsmatrix gespeichert unter: {conf_matrix_path}")
