@@ -1,12 +1,12 @@
 **/*.h5
-**/*.png
-**/*.jpg
-**/*.jpeg
-**/*.git
+# **/*.png
+# **/*.jpg
+# **/*.jpeg
+# **/*.gif
 **/*.c2
 **/*.raw
 **/*.dng
-**/*.bmp
+# **/*.bmp
 .h5
 .DS_Store
 .venv/
