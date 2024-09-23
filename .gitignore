@@ -1,3 +1,4 @@
+Projekt/dataset_quadratisch_128/**/*.png
 **/*.h5
 # **/*.png
 # **/*.jpg
@@ -11,8 +12,8 @@
 .DS_Store
 .venv/
 .idea/
-Projekt/modell_gespeichert/*.h5
-Projekt/saved_model/*.h5
+# Projekt/modell_gespeichert/*.h5
+# Projekt/saved_model/*.h5
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -153,11 +154,11 @@ cython_debug/
 
 
 # Ignoriere Bilddateien
-*.png
-*.jpg
-*.jpeg
-*.gif
-*.bmp
-*.tiff
-*.ico
+# *.png
+# *.jpg
+# *.jpeg
+# *.gif
+# *.bmp
+# *.tiff
+# *.ico
 
