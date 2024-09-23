@@ -8,7 +8,7 @@ In diesem Projekt wurden 3 Klassen getestet, die i.d.R. in der Öffentlichkeit z
 
 ### Begriffserklärung
 
-xc = xception
+- xc = xception
 
 ## Einrichtung
 
@@ -42,3 +42,7 @@ pip install -r requirements.txt
 
 1. falls nicht schon geschehen in die Entwicklungsumgebung wechseln mit `source .venv/bin/activate`
 2. anschließend das Skript starten `python3 Read_Camera_Image_And_Prognose_Object.py`
+
+## Links und weiteres
+
+- Datensatz: https://cloud.htw-berlin.de/f/149226865
